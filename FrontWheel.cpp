@@ -84,5 +84,6 @@ void fw_pos_controller(float desired_pos, long time_diff) {
   last_error = pos_error;
 
   float total_error =  sp_error + sv_error ;
+  //Serial.println(String(desired_pos)+'\t'+String(time_diff)+'\t'+String(fw_pos)+'\t'+String(sp_error)+'\t'+String(sv_error)+'\t'+String(total_error));
   set_motor_velocity((int)total_error);
 }

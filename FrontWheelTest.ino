@@ -43,12 +43,12 @@ void setup() {
   delay(500);
   readPidCoeffs();
   doTestProgram();
-  /*
+  return;
   while(true){
     readPidCoeffs();
-    //keepAtZero(100000);
+    keepAtZero(1000);
   }
-  */
+  
 }
 
 void readPidCoeffs() {
@@ -65,14 +65,19 @@ void readPidCoeffs() {
     digitalWrite(LED_BLU, LOW);
   } while(Kp == 0);
 }
-/*
+
 void keepAtZero(long iters) {
+  long curr_time;
+  long prev_time;
   for(long i = 0; i < iters; i++) {
+    curr_time = millis();
     readFrontWheelState();
-    fw_pos_controller(0);
+    fw_pos_controller(0, curr_time-prev_time);
+    delay(3);
+    prev_time = curr_time;
   }
   set_motor_velocity(0);
-}*/
+}
 
 void doTestProgram() {
   digitalWrite(LED_YLW, HIGH);
@@ -80,18 +85,24 @@ void doTestProgram() {
   unsigned long done_zeroing_time = start_time + 2000;
   long curr_time;
   long prev_time;
+
+  // move front wheel to zero
+  keepAtZero(200);
+  /*
   while(millis() < done_zeroing_time) {
     curr_time = millis();
     readFrontWheelState();
     fw_pos_controller(0, curr_time-prev_time);
     prev_time = curr_time;
   } 
+  */
   set_motor_velocity(0);
-  delay(100);
+  digitalWrite(LED_YLW, LOW);
+  delay(10);
   int counter = 0;
   int arr_idx = 0;
   float desired_pos = M_PI/4;
-  const int N = 400;
+  const int N = 300;
   long times[N];
   float positions[N];
   int step_idx = N/4;
@@ -99,12 +110,15 @@ void doTestProgram() {
     curr_time = millis();
     readFrontWheelState();
     if(arr_idx>=step_idx)fw_pos_controller(desired_pos, curr_time - prev_time);
-    counter = (counter+1) & 0xFF;
+    counter = (counter+1) & 0x4;
+    //Serial.print(counter);
+    //Serial.print(' ');
     if(counter==0) {
       times[arr_idx] = millis();
       positions[arr_idx] = fw_pos;
       arr_idx++;
     }
+    delay(3);//delayMicroseconds(50);
     prev_time = curr_time;
   }
   set_motor_velocity(0);
